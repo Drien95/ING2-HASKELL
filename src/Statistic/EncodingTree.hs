@@ -57,9 +57,18 @@ decode tree bits = case decodeOnce tree bits of
     Nothing      -> Nothing
   Nothing -> Nothing
 
+-- | Calculate the total number of symbols in the encoding tree
+totalLength :: EncodingTree a -> Int
+totalLength (EncodingLeaf c _) = c
+totalLength (EncodingNode c left right) = c + totalLength left + totalLength right
+
 -- | Mean length of the binary encoding
 meanLength :: EncodingTree a -> Double
-meanLength _ = undefined -- TODO
+meanLength tree = fromIntegral (countSymbols tree) / fromIntegral (totalLength tree)
+  where
+    countSymbols (EncodingLeaf c _) = c
+    countSymbols (EncodingNode c _ _) = c
+
 
 -- | Compress method using a function generating encoding tree and also returns generated encoding tree
 compress :: Eq a => ([a] -> Maybe (EncodingTree a)) -> [a] -> (Maybe (EncodingTree a), [Bit])
@@ -69,3 +78,5 @@ compress _ _ = undefined -- TODO
 -- If input cannot be uncompressed, returns `Nothing`
 uncompress :: (Maybe (EncodingTree a), [Bit]) -> Maybe [a]
 uncompress _ = undefined -- TODO
+
+
