@@ -74,11 +74,18 @@ meanLength tree = (meanLength' tree / fromIntegral total) * fromIntegral total
 
 -- | Compress method using a function generating encoding tree and also returns generated encoding tree
 compress :: Eq a => ([a] -> Maybe (EncodingTree a)) -> [a] -> (Maybe (EncodingTree a), [Bit])
-compress _ _ = undefined -- TODO
+compress f symbols =
+  case f symbols of
+    Just encodingTree ->
+      let encodedSymbols = concatMap (encode encodingTree) symbols
+      in (Just encodingTree, encodedSymbols)
+    Nothing -> (Nothing, [])
+
 
 -- | Uncompress method using previously generated encoding tree
 -- If input cannot be uncompressed, returns `Nothing`
 uncompress :: (Maybe (EncodingTree a), [Bit]) -> Maybe [a]
-uncompress _ = undefined -- TODO
+uncompress (Nothing, _) = Nothing
+uncompress (Just tree, bits) = decode tree bits
 
 
