@@ -1,15 +1,19 @@
 import Statistic.EncodingTree
+import Statistic.Bit
 
-tree :: EncodingTree Char
-tree =
-  EncodingNode 5
-    (EncodingNode 4 (EncodingLeaf 2 'A') (EncodingLeaf 2 'B'))
-    (EncodingLeaf 1 'C')
+-- Définissez un exemple d'arbre d'encodage pour tester
+exampleTree :: EncodingTree Char
+exampleTree =
+    EncodingNode 10
+        (EncodingNode 5 (EncodingLeaf 2 'A') (EncodingLeaf 3 'B'))
+        (EncodingLeaf 5 'C')
 
--- Tester la fonction totalLength
+-- Testez la fonction `decode` avec une chaîne de bits plus longue
 main :: IO ()
 main = do
-  let averageLength = meanLength tree
-      total = totalLength tree
-  putStrLn $ "La longueur moyenne du code est : " ++ show averageLength
-  putStrLn $ "Le nombre total de symboles dans l'arbre est : " ++ show total
+    putStrLn "Testing decode with a longer bit string:"
+    let bits = [One, Zero, Zero, One, One, Zero, Zero, One, One, One, Zero, One, One, One, Zero] -- Exemple de chaîne de bits
+    putStrLn $ "Bit string: " ++ show bits
+    case decode exampleTree bits of
+        Just symbols -> putStrLn $ "Decoded symbols: " ++ show symbols
+        Nothing      -> putStrLn "Decoding failed"

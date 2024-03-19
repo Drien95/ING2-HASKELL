@@ -41,6 +41,7 @@ encode (EncodingNode _ left right) s -- if we're on a node, we need to go deeper
 -- | Computes the first symbol from list of bits using encoding tree and also returns the list of bits still to process
 -- If computation is not possible, returns `Nothing`.
 decodeOnce :: EncodingTree a -> [Bit] -> Maybe (a, [Bit])
+decodeOnce (EncodingNode _ _ _) [] = Nothing
 decodeOnce (EncodingLeaf _ symbol) bits = Just (symbol, bits) -- if we're on the leaf, we're done returning the symbol and the rest of the bits
 decodeOnce (EncodingNode _ left right) (bit:bits) -- if we're on a node, we need to go deeper, so we take the first bit and continue
     | bit == Zero = decodeOnce left bits -- if the bit is 0, we go left
@@ -48,12 +49,12 @@ decodeOnce (EncodingNode _ left right) (bit:bits) -- if we're on a node, we need
 
 -- | Computes list of symbols from list of bits using encoding tree
 decode :: EncodingTree a -> [Bit] -> Maybe [a]
-decode _ [] = Just []
-decode tree bits = case decodeOnce tree bits of
-  Just (symbol, restBits) -> case decode tree restBits of
-    Just symbols -> Just (symbol : symbols)
-    Nothing      -> Nothing
-  Nothing -> Nothing
+decode _ [] = Just [] -- if there are no bits left, we're done
+decode tree bits = case decodeOnce tree bits of -- if there are bits left, we need to decode the first symbol and continue
+  Just (symbol, restBits) -> case decode tree restBits of -- if we decoded the symbol, we continue with the rest of the bits
+    Just symbols -> Just (symbol : symbols) 
+    Nothing      -> Just [symbol] 
+  Nothing -> Nothing 
 
 -- | Calculate the total number of symbols in the encoding tree
 totalLength :: EncodingTree a -> Int
@@ -70,8 +71,6 @@ meanLength tree = (meanLength' tree / fromIntegral total) * fromIntegral total
     meanLength' :: EncodingTree a -> Double
     meanLength' (EncodingLeaf size _) = (fromIntegral size / fromIntegral total) * fromIntegral size
     meanLength' (EncodingNode _ left right) = meanLength' left + meanLength' right
-
-
 
 -- | Compress method using a function generating encoding tree and also returns generated encoding tree
 compress :: Eq a => ([a] -> Maybe (EncodingTree a)) -> [a] -> (Maybe (EncodingTree a), [Bit])
