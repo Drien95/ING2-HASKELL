@@ -3,7 +3,7 @@
   Description : A module representing a binary tree for binary encoding
   Maintainer : ???
 -}
-module Statistic.EncodingTree(EncodingTree(..), isLeaf, count, has, encode, decodeOnce, decode, meanLength, compress, uncompress) where
+module Statistic.EncodingTree(EncodingTree(..), isLeaf, count, has, encode, decodeOnce, decode, totalLength, meanLength, compress, uncompress) where
 
 import Statistic.Bit
 
@@ -36,7 +36,6 @@ encode (EncodingNode _ left right) s -- if we're on a node, we need to go deeper
     | left `has` s  = fmap (Zero :) (encode left s) -- if the symbol is in the left subtree, we add a 0 and continue
     | right `has` s = fmap (One :) (encode right s) -- if the symbol is in the right subtree, we add a 1 and continue
     | otherwise          = Nothing
-encode _ _ = Nothing
 
 
 -- | Computes the first symbol from list of bits using encoding tree and also returns the list of bits still to process
@@ -46,7 +45,6 @@ decodeOnce (EncodingLeaf _ symbol) bits = Just (symbol, bits) -- if we're on the
 decodeOnce (EncodingNode _ left right) (bit:bits) -- if we're on a node, we need to go deeper, so we take the first bit and continue
     | bit == Zero = decodeOnce left bits -- if the bit is 0, we go left
     | bit == One  = decodeOnce right bits -- if the bit is 1, we go right
-decodeOnce _ _ = Nothing
 
 -- | Computes list of symbols from list of bits using encoding tree
 decode :: EncodingTree a -> [Bit] -> Maybe [a]
@@ -59,15 +57,20 @@ decode tree bits = case decodeOnce tree bits of
 
 -- | Calculate the total number of symbols in the encoding tree
 totalLength :: EncodingTree a -> Int
-totalLength (EncodingLeaf c _) = c
-totalLength (EncodingNode c left right) = c + totalLength left + totalLength right
+totalLength (EncodingLeaf size _) = size
+totalLength (EncodingNode _ left right) = totalLength left + totalLength right
 
 -- | Mean length of the binary encoding
 meanLength :: EncodingTree a -> Double
-meanLength tree = fromIntegral (countSymbols tree) / fromIntegral (totalLength tree)
+meanLength tree = (meanLength' tree / fromIntegral total) * fromIntegral total
   where
-    countSymbols (EncodingLeaf c _) = c
-    countSymbols (EncodingNode c _ _) = c
+    total = totalLength tree
+
+    -- Auxilary function to calculate mean length
+    meanLength' :: EncodingTree a -> Double
+    meanLength' (EncodingLeaf size _) = (fromIntegral size / fromIntegral total) * fromIntegral size
+    meanLength' (EncodingNode _ left right) = meanLength' left + meanLength' right
+
 
 
 -- | Compress method using a function generating encoding tree and also returns generated encoding tree
