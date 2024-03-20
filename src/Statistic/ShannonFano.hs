@@ -9,5 +9,34 @@ import Statistic.EncodingTree
 
 -- | Shannon-Fano tree generation
 tree :: Ord a => [a] -> Maybe (EncodingTree a)
-tree _ = undefined -- TODO
+tree [] = Nothing
+tree [x] = Nothing
+tree source = Just (treeAux (reverse (orderedCounts source)))
+  where treeAux [(a,b)] = EncodingLeaf b a
+        treeAux [(a,b),(c,d)] = EncodingNode (b+d) (EncodingLeaf b a) (EncodingLeaf d c)
+        treeAux list = EncodingNode total (treeAux (fst splittedList)) (treeAux (snd splittedList))
+          where 
+            total = sum (map (snd) list)
+            splittedList = split list 
+
+
+-- | Determines which number is the closest to target between x and y
+closestTo :: (Num a, Ord a) => a -> a -> a -> a
+closestTo x y target
+    | abs (x - target) <= abs (y - target) = x
+    | otherwise = y
+
+-- | Splits a list of orderedOcurrences in the most balanced two subLists 
+split :: Ord a => [(a, Int)] -> ([(a, Int)], [(a, Int)])
+split l = splitAt (splitInd 0 0.0 l) l
+  where 
+    med :: Double
+    med = fromIntegral (sum (map (snd) l)) / 2.0
+    splitInd i _ [] = i  
+    splitInd i acc (x:xs) 
+      | v + acc == med  = i+1
+      | v + acc > med = if (closestTo acc (v+acc)  med) == acc then i else i+1
+      | otherwise = splitInd (i+1) (v+acc) xs
+        where 
+          v = fromIntegral (snd x)
 
