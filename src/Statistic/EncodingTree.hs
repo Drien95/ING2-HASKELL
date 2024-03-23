@@ -77,7 +77,9 @@ compress :: Eq a => ([a] -> Maybe (EncodingTree a)) -> [a] -> (Maybe (EncodingTr
 compress f symbols =
   case f symbols of
     Just encodingTree ->
-      let encodedSymbols = concatMap (encode encodingTree) symbols
+      let encodedSymbols = case mapM (encode encodingTree) symbols of
+                             Just bits -> concat bits
+                             Nothing   -> []
       in (Just encodingTree, encodedSymbols)
     Nothing -> (Nothing, [])
 
