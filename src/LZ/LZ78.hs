@@ -30,17 +30,16 @@ longestMatch current (c:cs) dict =
        else longestMatch next cs dict
 longestMatch current [] _ = (current, [])
 
-
 -- | LZ78 uncompress method
 -- If input cannot be uncompressed, returns `Nothing`
 uncompress :: [(Int, Char)] -> Maybe String
-uncompress compressed = decompressAux compressed 1 empty
+uncompress compressed = uncompressAux compressed 1 empty
   where
-    decompressAux :: [(Int, Char)] -> Int -> [String] -> Maybe String
-    decompressAux [] _ _ = Just ""
-    decompressAux ((index, char):cs) dictIndex dict =
+    uncompressAux :: [(Int, Char)] -> Int -> [String] -> Maybe String
+    uncompressAux [] _ _ = Just ""
+    uncompressAux ((index, char):cs) dictIndex dict =
       let newString = if index == 0 then [char] else (dict !! index) ++ [char]
           newDict = dict ++ [newString]
       in if index < dictIndex
-         then fmap (newString ++) (decompressAux cs (dictIndex + 1) newDict)
+         then fmap (newString ++) (uncompressAux cs (dictIndex + 1) newDict)
          else Nothing
