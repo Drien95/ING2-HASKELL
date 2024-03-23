@@ -3,7 +3,7 @@
   Description : A module representing a binary tree for binary encoding
   Maintainer : ???
 -}
-module Statistic.EncodingTree(EncodingTree(..), isLeaf, count, has, encode, decodeOnce, decode, totalLength, meanLength, compress, uncompress) where
+module Statistic.EncodingTree(EncodingTree(..), isLeaf, count, has, encode, decodeOnce, decode, meanLength, compress, uncompress) where
 
 import Statistic.Bit
 
@@ -56,14 +56,9 @@ decode tree bits = case decodeOnce tree bits of -- if there are bits left, we ne
     Nothing      -> Just [symbol] 
   Nothing -> Nothing 
 
--- | Calculate the total number of symbols in the encoding tree
-totalLength :: EncodingTree a -> Int
-totalLength (EncodingLeaf size _) = size
-totalLength (EncodingNode _ left right) = totalLength left + totalLength right
-
 -- | Mean length of the binary encoding
 meanLength :: EncodingTree a -> Double
-meanLength tree = meanLength' tree 0 / fromIntegral (totalLength tree)
+meanLength tree = meanLength' tree 0 / fromIntegral (count tree)
   where
     -- Auxilary function to calculate mean length
     meanLength' :: EncodingTree a -> Int -> Double

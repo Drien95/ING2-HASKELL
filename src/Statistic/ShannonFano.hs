@@ -14,7 +14,6 @@ tree :: Ord a => [a] -> Maybe (EncodingTree a)
 tree [] = Nothing
 tree source = Just (treeAux (reverse (orderedCounts source)))
   where treeAux [(a,b)] = EncodingLeaf b a
-        treeAux [(a,b),(c,d)] = EncodingNode (b+d) (EncodingLeaf b a) (EncodingLeaf d c)
         treeAux list = EncodingNode total (treeAux (fst splittedList)) (treeAux (snd splittedList))
           where 
             total = sum (map (snd) list)
