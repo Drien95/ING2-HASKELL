@@ -1,19 +1,26 @@
 import Statistic.EncodingTree
 import Statistic.Bit
+import Statistic.ShannonFano
 
--- Définissez un exemple d'arbre d'encodage pour tester
-exampleTree :: EncodingTree Char
-exampleTree =
-    EncodingNode 10
-        (EncodingNode 5 (EncodingLeaf 2 'A') (EncodingLeaf 3 'B'))
-        (EncodingLeaf 5 'C')
+exampleSource :: String
+exampleSource = "AAAABBBCCD"
 
 -- Testez la fonction `decode` avec une chaîne de bits plus longue
 main :: IO ()
 main = do
-    putStrLn "Testing decode with a longer bit string:"
-    let bits = [One, Zero, Zero, One, One, Zero, Zero, One, One, One, Zero, One, One, One, Zero] -- Exemple de chaîne de bits
-    putStrLn $ "Bit string: " ++ show bits
-    case decode exampleTree bits of
-        Just symbols -> putStrLn $ "Decoded symbols: " ++ show symbols
-        Nothing      -> putStrLn "Decoding failed"
+     -- Générez l'arbre Shannon-Fano à partir de la source
+    let shannonTree = tree exampleSource
+
+    -- Compressez la source en utilisant l'arbre Shannon-Fano généré
+    let shannonCompress = compress tree exampleSource
+
+    let shannonDecompress = uncompress shannonCompress
+    
+    -- Affichez le résultat
+    case shannonCompress of
+        (Just encodingTree, encodedSymbols) -> putStrLn $ "Arbre Shannon-Fano : " ++ show encodingTree ++ "\n" ++ "Symboles encodés : " ++ show encodedSymbols
+        (Nothing, _) -> putStrLn "Impossible de créer l'arbre Shannon-Fano"
+
+    case shannonDecompress of
+        Just decodedSymbols -> putStrLn $ "Symboles décodés : " ++ show decodedSymbols
+        Nothing -> putStrLn "Impossible de décoder les symboles"
