@@ -1,14 +1,14 @@
 import Statistic.EncodingTree
 import Statistic.Bit
-import Statistic.ShannonFano
+import Statistic.Huffman
 
 exampleSource :: String
-exampleSource = "AAAABBBCCD"
+exampleSource = "AABBCE"
 
 -- Testez la fonction `decode` avec une chaîne de bits plus longue
 main :: IO ()
 main = do
-     -- Générez l'arbre Shannon-Fano à partir de la source
+   {--  -- Générez l'arbre Shannon-Fano à partir de la source
     let shannonTree = tree exampleSource
 
     -- Compressez la source en utilisant l'arbre Shannon-Fano généré
@@ -24,3 +24,13 @@ main = do
     case shannonDecompress of
         Just decodedSymbols -> putStrLn $ "Symboles décodés : " ++ show decodedSymbols
         Nothing -> putStrLn "Impossible de décoder les symboles"
+        --}
+
+    -- Construction de l'arbre de Huffman
+    let huffmanTree = tree exampleSource
+    
+    -- Affichage de l'arbre de Huffman
+    putStrLn "Arbre de Huffman :"
+    case huffmanTree of
+        Just tree -> print tree
+        Nothing   -> putStrLn "Impossible de créer l'arbre de Huffman."
