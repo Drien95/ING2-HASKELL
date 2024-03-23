@@ -63,14 +63,13 @@ totalLength (EncodingNode _ left right) = totalLength left + totalLength right
 
 -- | Mean length of the binary encoding
 meanLength :: EncodingTree a -> Double
-meanLength tree = (meanLength' tree / fromIntegral total) * fromIntegral total
+meanLength tree = meanLength' tree 0 / fromIntegral (totalLength tree)
   where
-    total = totalLength tree
-
     -- Auxilary function to calculate mean length
-    meanLength' :: EncodingTree a -> Double
-    meanLength' (EncodingLeaf size _) = (fromIntegral size / fromIntegral total) * fromIntegral size
-    meanLength' (EncodingNode _ left right) = meanLength' left + meanLength' right
+    meanLength' :: EncodingTree a -> Int -> Double
+    meanLength' (EncodingLeaf size _) depth = fromIntegral size * fromIntegral depth
+    meanLength' (EncodingNode _ left right) depth = 
+        meanLength' left (depth + 1) + meanLength' right (depth + 1)
 
 -- | Compress method using a function generating encoding tree and also returns generated encoding tree
 compress :: Eq a => ([a] -> Maybe (EncodingTree a)) -> [a] -> (Maybe (EncodingTree a), [Bit])
