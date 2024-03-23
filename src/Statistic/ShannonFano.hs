@@ -31,13 +31,15 @@ closestTo x y target
 split :: Ord a => [(a, Int)] -> ([(a, Int)], [(a, Int)])
 split l = splitAt (splitInd 0 0.0 l) l
   where 
-    med :: Double
-    med = fromIntegral (sum (map (snd) l)) / 2.0
+    md :: Double
+    md = fromIntegral (sum (map (snd) l)) / 2.0
     splitInd i _ [] = i  
     splitInd i acc (x:xs) 
-      | v + acc == med  = i+1
-      | v + acc > med = if (closestTo acc (v+acc)  med) == acc then i else i+1
+      | v + acc == md  = i+1
+      | v + acc > md = if (closestTo acc (v+acc)  md) == acc then i else i+1
       | otherwise = splitInd (i+1) (v+acc) xs
         where 
           v = fromIntegral (snd x)
+          
+
 
