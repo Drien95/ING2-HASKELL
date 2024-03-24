@@ -2,7 +2,8 @@ module LZ.LZW (compress, uncompress) where
 
 import LZ.Dictionaries (ascii, Dictionary)
 import Data.List (elemIndex)
-import Data.Maybe (fromMaybe)
+import Data.Maybe
+
 
 -- | LZW compress Method
 compress :: String -> [Int]
@@ -37,28 +38,21 @@ compress = compress' ascii
 -- | LZW uncompress method
 -- If input cannot be uncompressed, returns `Nothing`
 uncompress :: [Int] -> Maybe String
-uncompress xs = uncompress' ascii xs
-    where
-        uncompress' :: Dictionary -> [Int] -> Maybe String
-        uncompress' _ [] = Just []
-        uncompress' dict (x:xs) = case decode x dict of
-            Just entry -> case uncompressRest dict entry xs of
-                Just rest -> fmap (entry ++) (uncompress' (addToDict (entry ++ if null rest then "" else [head rest]) dict) xs)
-                Nothing -> Nothing
-            Nothing -> error "Index not found in dictionary"
+uncompress [] = Nothing
+uncompress code = uncompress' code 0 ascii (Just [])
+  where
+    uncompress' :: [Int] -> Int -> Dictionary -> Maybe String -> Maybe String
+    uncompress' [] _ _ acc = acc
+    uncompress' (index:code) preIndex dict acc
+      | index < 0 || length dict < index || isNothing acc || (length dict == index && length (fromJust acc) == 0) = Nothing
+      | otherwise = uncompress' code index newDict (Just (maybeAcc ++ char))
+      where
+        maybeAcc = fromJust acc
+        char = newDict !! index
+        preChar = dict !! preIndex
+        newDict = if length maybeAcc == 0
+                  then dict
+                  else if index < (length dict)
+                       then dict ++ [(preChar ++ [head char])]
+                       else dict ++ [(preChar ++ [head preChar])]
 
-        decode :: Int -> Dictionary -> Maybe String
-        decode index dict
-            | index < length dict = Just (dict !! index)
-            | otherwise = Nothing
-
-        uncompressRest :: Dictionary -> String -> [Int] -> Maybe String
-        uncompressRest _ _ [] = Just []
-        uncompressRest dict w (y:ys) = case decode y dict of
-            Just entry -> Just entry
-            Nothing -> case decode (length dict) dict of
-                Just newEntry -> Just newEntry
-                Nothing -> Nothing
-
-        addToDict :: String -> Dictionary -> Dictionary
-        addToDict s d = if s `elem` d then d else d ++ [s]
