@@ -57,8 +57,7 @@ Pour _exécuter le script_, tapez les commande suivante :
 
 Si stack ne marche pas :
 
-A faire
-
+`ghc -o exec_name -isrc -iapp app/Main.hs`
 
 
 
